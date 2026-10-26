@@ -6,9 +6,9 @@ import { palette } from '../data/colors';
 export class MarkerService {
   private openTooltip: HTMLElement | null = null;
 
-  public userMarker!: google.maps.marker.AdvancedMarkerElement;
+  userMarker!: google.maps.marker.AdvancedMarkerElement;
 
-  public createUserMarker(map: GoogleMap, position: google.maps.LatLngLiteral): void {
+  createUserMarker(map: GoogleMap, position: google.maps.LatLngLiteral): void {
     if (!this.userMarker) {
       this.userMarker = new google.maps.marker.AdvancedMarkerElement({
         map: map.googleMap,
@@ -21,7 +21,7 @@ export class MarkerService {
     }
   }
 
-  public createPoiMarker(
+  createPoiMarker(
     map: GoogleMap,
     position: google.maps.LatLngLiteral,
     onButtonClick: () => void,
@@ -30,7 +30,7 @@ export class MarkerService {
     const markerEl = this.#createMarkerElement(palette.pink_dark);
     const tooltipEl = this.#createTooltipElement(onButtonClick);
 
-    // Toggles this tooltip, and hides othera
+    // Toggles this tooltip, and hides others
     markerEl.addEventListener('click', e => {
       e.stopPropagation();
       tooltipEl.style.display === 'none'
@@ -102,7 +102,7 @@ export class MarkerService {
       const btn = tooltip.querySelector<HTMLButtonElement>('#tooltip-btn');
 
       if (btn) {
-        btn?.addEventListener('click', onButtonClick);
+        btn.addEventListener('click', onButtonClick);
 
         Object.assign(btn.style, {
           backgroundColor: palette.pink_lighter,

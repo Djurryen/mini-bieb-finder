@@ -1,4 +1,5 @@
-import { Component, ViewChild, WritableSignal, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, AfterViewInit, ViewChild, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GoogleMap, GoogleMapsModule } from '@angular/google-maps';
 import { points_of_interest } from './data/points-of-interest';
 import { RoutesService } from './services/routes.service';
@@ -22,25 +23,28 @@ import { palette } from './data/colors';
   imports: [GoogleMapsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
-  initPosition: WritableSignal<google.maps.LatLngLiteral> = signal({ lat: 0, lng: 0 });
-  orientationEnabled: WritableSignal<boolean> = signal(false);
-  activePath: google.maps.Polyline | null = null;
-  mapOptions = MapOptions;
+export class AppComponent implements OnInit, AfterViewInit {
+  readonly initPosition = signal<google.maps.LatLngLiteral>({ lat: 0, lng: 0 });
 
-  userPosition$ = new BehaviorSubject<google.maps.LatLngLiteral | null>(null);
-  activePoi$ = new BehaviorSubject<google.maps.LatLngLiteral | null>(null);
+  private activePath: google.maps.Polyline | null = null;
+  readonly mapOptions = MapOptions;
+
+  private readonly userPosition$ = new BehaviorSubject<google.maps.LatLngLiteral | null>(null);
+  private readonly activePoi$ = new BehaviorSubject<google.maps.LatLngLiteral | null>(null);
 
   @ViewChild('map', { static: false }) map!: GoogleMap;
 
-  #routesService = inject(RoutesService);
-  #markerService = inject(MarkerService);
+  readonly #routesService = inject(RoutesService);
+  readonly #markerService = inject(MarkerService);
+  readonly #destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     this.#setInitialPosition();
+
     this.#watchUserPosition()
-      .pipe(distinctUntilChanged())
+      .pipe(distinctUntilChanged(), takeUntilDestroyed(this.#destroyRef))
       .subscribe(position => {
         this.userPosition$.next(position);
       });
@@ -54,6 +58,7 @@ export class AppComponent {
             { latitude: poi!.lat, longitude: poi!.lng },
           ),
         ),
+        takeUntilDestroyed(this.#destroyRef),
       )
       .subscribe((route: RouteResponse) => this.#drawPath(route));
   }
@@ -82,10 +87,10 @@ export class AppComponent {
           ),
       ),
       map(position => {
-        const userPosition = {
+        const userPosition: google.maps.LatLngLiteral = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
-        } as google.maps.LatLngLiteral;
+        };
 
         this.#markerService.createUserMarker(this.map, userPosition);
 
@@ -116,42 +121,4 @@ export class AppComponent {
       });
     }
   }
-
-  // enableOrientation(): void {
-  //   this.orientationEnabled.set(true);
-
-  //   let currentHeading = 0;
-
-  //   const handleOrientation = (event: DeviceOrientationEvent) => {
-  //     const target = event.alpha;
-
-  //     if (target != null) {
-  //       currentHeading = currentHeading + (target - currentHeading) * 0.1;
-  //       this.map.googleMap?.setHeading(currentHeading);
-  //     }
-  //   };
-
-  //   const addOrientationTracking = () => {
-  //     this.map.googleMap?.setTilt(45);
-  //     window.addEventListener('deviceorientation', handleOrientation);
-  //     window.addEventListener('pointerdown', removeOrientationTracking);
-  //   };
-
-  //   const removeOrientationTracking = () => {
-  //     this.map.googleMap?.setTilt(0);
-  //     this.orientationEnabled.set(false);
-  //     window.removeEventListener('deviceorientation', handleOrientation);
-  //     window.removeEventListener('pointerdown', removeOrientationTracking);
-  //   };
-
-  //   if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-  //     (DeviceOrientationEvent as any).requestPermission().then((state: string) => {
-  //       if (state === 'granted') {
-  //         addOrientationTracking();
-  //       }
-  //     });
-  //   } else {
-  //     addOrientationTracking();
-  //   }
-  // }
 }

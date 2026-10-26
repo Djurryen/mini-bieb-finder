@@ -46,3 +46,9 @@ Thumbs.db
 .env
 .env.local
 .vercel
+
+# Firebase deployment artifacts (not used — app is deployed via Vercel)
+.firebaserc
+.firebase/
+firebase.json
+firebase.json.save
