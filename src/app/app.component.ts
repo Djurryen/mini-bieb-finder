@@ -44,7 +44,10 @@ export class AppComponent implements OnInit, AfterViewInit {
     this.#setInitialPosition();
 
     this.#watchUserPosition()
-      .pipe(distinctUntilChanged(), takeUntilDestroyed(this.#destroyRef))
+      .pipe(
+        distinctUntilChanged((a, b) => a.lat === b.lat && a.lng === b.lng),
+        takeUntilDestroyed(this.#destroyRef),
+      )
       .subscribe(position => {
         this.userPosition$.next(position);
       });
@@ -109,6 +112,8 @@ export class AppComponent implements OnInit, AfterViewInit {
     if (!encoded) return;
 
     const decodedPath = google.maps.geometry?.encoding.decodePath(encoded);
+
+    if (!decodedPath) return;
 
     if (this.activePath) {
       this.activePath.setPath(decodedPath);

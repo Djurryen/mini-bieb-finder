@@ -1,7 +1,14 @@
 export interface RouteResponse {
-    routes: Array<{
+  routes: Array<{
+    polyline: {
+      encodedPolyline: string;
+    };
+    legs: Array<{
+      steps: Array<{
         polyline: {
-            encodedPolyline: string;
-        }
-    }>
+          encodedPolyline: string;
+        };
+      }>;
+    }>;
+  }>;
 }

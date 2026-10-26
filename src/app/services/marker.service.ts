@@ -98,32 +98,30 @@ export class MarkerService {
       display: 'none',
     });
 
-    setTimeout(() => {
-      const btn = tooltip.querySelector<HTMLButtonElement>('#tooltip-btn');
+    const btn = tooltip.querySelector<HTMLButtonElement>('#tooltip-btn');
 
-      if (btn) {
-        btn.addEventListener('click', onButtonClick);
+    if (btn) {
+      btn.addEventListener('click', onButtonClick);
 
-        Object.assign(btn.style, {
-          backgroundColor: palette.pink_lighter,
-          color: '#fff',
-          border: 'none',
-          borderRadius: '4px',
-          padding: '6px 12px',
-          fontSize: '14px',
-          cursor: 'pointer',
-          fontWeight: '500',
-          transition: 'background-color 0.2s ease',
-        });
-    
-        btn.addEventListener('mouseenter', () => {
-          btn.style.backgroundColor = palette.pink_light;
-        });
-        btn.addEventListener('mouseleave', () => {
-          btn.style.backgroundColor = palette.pink_lighter;
-        });
-      }
-    });
+      Object.assign(btn.style, {
+        backgroundColor: palette.pink_lighter,
+        color: '#fff',
+        border: 'none',
+        borderRadius: '4px',
+        padding: '6px 12px',
+        fontSize: '14px',
+        cursor: 'pointer',
+        fontWeight: '500',
+        transition: 'background-color 0.2s ease',
+      });
+
+      btn.addEventListener('mouseenter', () => {
+        btn.style.backgroundColor = palette.pink_light;
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.backgroundColor = palette.pink_lighter;
+      });
+    }
 
     return tooltip;
   }
